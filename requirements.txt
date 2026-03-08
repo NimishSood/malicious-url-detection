@@ -1,0 +1,13 @@
+# Direct project dependencies
+# Standard-library modules used by the notebook do not need installation:
+# pathlib, io, urllib.parse, hashlib, re
+
+numpy==2.4.2
+pandas==3.0.1
+matplotlib==3.10.8
+seaborn==0.13.2
+ipython==9.9.0
+ipykernel==7.2.0
+jupyterlab==4.5.5
+nbconvert==7.17.0
+nbformat==5.10.4
