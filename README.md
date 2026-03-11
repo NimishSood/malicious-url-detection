@@ -1,18 +1,16 @@
 # Malicious URL Detection
 
-This project analyzes a labeled URL dataset to demonstrate five core data science competencies:
+This repository contains an end-to-end exploratory analysis of a labeled malicious URL dataset in [`notebooks/file1.ipynb`](notebooks/file1.ipynb). The notebook is structured as a reproducible analytical report covering data acquisition, data understanding, data cleaning, exploratory data analysis (EDA), and statistical reasoning.
 
-1. Data Acquisition
-2. Data Understanding
-3. Data Cleaning
-4. Exploratory Data Analysis (EDA)
-5. Statistical Reasoning and Interpretation
+## Project Focus
 
-The main analytical report is in [`notebooks/file1.ipynb`](notebooks/file1.ipynb).
+The notebook is designed to demonstrate these core competencies:
 
-## Project Motivation
-
-Cyberattacks frequently rely on deceptive URLs to steal credentials, distribute malware, or direct users to compromised pages. This project explores whether structural URL patterns can support malicious URL analysis.
+1. Reproducible data loading and provenance tracking
+2. Dataset understanding and class-balance analysis
+3. Deterministic, auditable data cleaning
+4. Exploratory analysis of lexical URL patterns
+5. Statistical reasoning with spread and uncertainty measures
 
 ## Dataset
 
@@ -23,64 +21,112 @@ Cyberattacks frequently rely on deceptive URLs to steal credentials, distribute 
   - `url`: raw URL text
   - `type`: label (`benign`, `phishing`, `malware`, `defacement`)
 
-The notebook also documents the upstream source collections referenced by the dataset creator (ISCX-URL-2016, Malware Domain Blacklist, Faizan repository, PhishTank, PhishStorm).
+The notebook also documents the upstream collections referenced by the dataset creator, including ISCX-URL-2016, Malware Domain Blacklist, Faizan repository, PhishTank, and PhishStorm.
 
 ## Notebook Workflow
 
-### 1) Data Acquisition
+### 1. Reproducibility and Data Acquisition
 
-- Documents dataset origin and class-label context.
-- Uses reproducible relative-path loading logic.
-- Validates required columns (`url`, `type`).
-- Captures local data provenance (file path, size, SHA-256 hash).
+- Uses relative-path loading so the notebook runs from either the repository root or `notebooks/`
+- Validates the expected schema and keeps fallback handling explicit
+- Prints local file provenance:
+  - resolved path
+  - file size
+  - SHA-256 hash
+  - row count
+  - loaded columns
 
-### 2) Data Understanding
+### 2. Data Understanding
 
-- Provides a data dictionary and class definitions.
-- Reports shape, dtypes, sample records, and class balance.
-- Summarizes URL-length behavior and explicit scheme usage by class.
+- Defines the dataset schema and label meanings
+- Reports shape, data types, sample rows, and class balance
+- Summarizes URL length by class
+- Measures explicit `http`/`https` scheme usage by class
 
-### 3) Data Cleaning
+Current raw class balance from the notebook:
 
-Implements a deterministic, auditable cleaning pipeline:
+- `benign`: 428,103
+- `defacement`: 96,457
+- `phishing`: 94,111
+- `malware`: 32,520
 
-1. Standardize string formatting (`strip`, lowercase labels)
-2. Remove null/empty URL or label rows
-3. Keep only expected labels
-4. Remove URLs with whitespace/control characters
-5. Remove exact duplicate rows
-6. Remove exact duplicate URLs with conflicting labels
+### 3. Data Cleaning
 
-The notebook outputs a step-by-step cleaning audit table showing rows removed per rule.
+The notebook applies a deterministic cleaning pipeline:
 
-### 4) Exploratory Data Analysis (EDA)
+1. Normalize string formatting and labels
+2. Drop missing URL or label values
+3. Drop empty URL or label values after stripping
+4. Keep only expected labels
+5. Remove URLs containing whitespace
+6. Remove URLs containing control characters
+7. Remove exact duplicate rows
+8. Remove duplicate URLs with conflicting labels
 
-EDA includes:
+Cleaning audit reported in the notebook:
 
-- Class distribution with imbalance interpretation
-- URL length distribution and per-class comparison
-- Lexical feature analysis (`url_length`, `digit_count`, `dot_count`, `hyphen_count`, `slash_count`)
-- Correlation heatmap of lexical features
+- Rows before cleaning: 651,191
+- Rows after cleaning: 640,792
+- Rows removed total: 10,399
+
+Post-cleaning class counts:
+
+- `benign`: 427,931
+- `defacement`: 95,285
+- `phishing`: 93,931
+- `malware`: 23,645
+
+### 4. Exploratory Data Analysis
+
+EDA in the notebook includes:
+
+- Class distribution plots for the cleaned dataset
+- URL length distribution and class-wise comparison
+- Lexical feature engineering:
+  - `url_length`
+  - `digit_count`
+  - `dot_count`
+  - `hyphen_count`
+  - `slash_count`
+  - `has_query`
+  - `has_scheme`
+  - `has_ip_host`
+  - `tld`
+- Mean feature heatmaps by class
+- Correlation analysis for core lexical features
 - Suspicious token prevalence by class (`login`, `verify`, `account`, `secure`, `update`, `bank`)
-- TLD composition by class
+- Top-TLD composition by class
 
-Each visualization is paired with interpretation text.
+### 5. Statistical Reasoning and Interpretation
 
-### 5) Statistical Reasoning and Interpretation
+The notebook now makes the statistical reasoning explicit rather than leaving it implied in the charts.
 
-The notebook now explicitly demonstrates statistical reasoning through:
+It includes:
 
-- `4.2 URL length behavior`: distribution shape and class-level spread, with interpretation of skew and differing medians
-- `4.3 Lexical feature patterns`: class-level averages and correlation structure for core lexical features
-- `4.4 Statistical reasoning and uncertainty`: descriptive summaries by class (`mean`, `median`, `std`, `IQR`, `95% CI`, coefficient of variation) plus uncertainty-aware interpretation
-- `4.4 Statistical reasoning and uncertainty`: Spearman correlation ranking and Wilson confidence intervals for query-string prevalence and IP-host usage
-- `4.5` and `4.6`: Markdown interpretation that explains what token-prevalence and TLD-composition outputs show, why they matter, and what limitations remain
+- Descriptive summaries by class for URL length:
+  - count
+  - mean
+  - median
+  - standard deviation
+  - quartiles
+  - IQR
+  - 95th percentile
+  - coefficient of variation
+  - mean-minus-median gap
+  - 95% confidence intervals for the mean
+- Spearman correlation ranking for lexical features
+- Wilson confidence intervals for:
+  - query-string prevalence
+  - IP-host prevalence
+- Interpretation text after each major section to explain what the patterns mean and what their limits are
 
-What was added:
+Examples of current notebook findings:
 
-- A dedicated statistical reasoning subsection in the notebook
-- Explicit discussion of variability, spread, and uncertainty
-- Clear Markdown explanations for the main statistical outputs and their implications
+- `defacement` URLs have the highest typical length
+- `phishing` URLs show the highest relative variability in length
+- `url_length` and `slash_count` have the strongest monotonic relationship among the core lexical features
+- `defacement` URLs show the highest query-string rate
+- `malware` URLs stand out for IP-based hosts
 
 ## Repository Structure
 
@@ -91,24 +137,42 @@ malicious-url-detection
 ├── notebooks
 │   └── file1.ipynb
 ├── src
-│   └── feature_engineering.py
 ├── requirements.txt
-└── README.md
+├── README.md
+└── MaliciousURL_Analysis_Improved.pptx
 ```
 
 ## How to Run
 
-1. Create and activate a virtual environment (Python 3.11+ recommended).
+1. Create and activate a virtual environment with Python 3.11 or newer.
 2. Install dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
-3. Start Jupyter:
+
+3. Start JupyterLab:
+
    ```bash
    jupyter lab
    ```
-4. Open `notebooks/file1.ipynb` and run all cells in order.
 
-## Current Scope and Next Steps
+4. Open `notebooks/file1.ipynb` and run the cells in order.
 
-Current notebook scope is data acquisition, understanding, cleaning, EDA, and statistical reasoning/interpretation. Model training/evaluation can be added next (for example logistic regression, tree-based models, and class-aware evaluation metrics).
+## Dependencies
+
+The project dependencies are listed in [`requirements.txt`](requirements.txt) and currently include:
+
+- `numpy`
+- `pandas`
+- `matplotlib`
+- `seaborn`
+- `ipython`
+- `ipykernel`
+- `jupyterlab`
+- `nbconvert`
+- `nbformat`
+
+## Current Scope
+
+This repository currently focuses on analytical reporting: acquisition, understanding, cleaning, EDA, reproducibility, and statistical interpretation of malicious URL patterns. It does not yet include model training, validation, or deployment.
