@@ -1,132 +1,133 @@
 # Malicious URL Detection
 
-This repository contains an end-to-end exploratory analysis of a labeled malicious URL dataset in [`notebooks/file1.ipynb`](notebooks/file1.ipynb). The notebook is structured as a reproducible analytical report covering data acquisition, data understanding, data cleaning, exploratory data analysis (EDA), and statistical reasoning.
+This repository is a statistics/data mining course project on malicious URL detection. It now has two complementary layers:
 
-## Project Focus
+- [`notebooks/file1.ipynb`](notebooks/file1.ipynb): data acquisition, cleaning, EDA, and descriptive statistical reasoning
+- [`notebooks/02_statistical_modeling.ipynb`](notebooks/02_statistical_modeling.ipynb): supervised modelling, model comparison, test evaluation, and interpretation
 
-The notebook is designed to demonstrate these core competencies:
+The project is designed to demonstrate four course skills:
 
-1. Reproducible data loading and provenance tracking
-2. Dataset understanding and class-balance analysis
-3. Deterministic, auditable data cleaning
-4. Exploratory analysis of lexical URL patterns
-5. Statistical reasoning with spread and uncertainty measures
+1. Statistical Modelling
+2. Statistical Reasoning and Interpretation
+3. Analytical Question Formulation
+4. Reproducibility and Professional Practice
+
+## Analytical Questions
+
+The modelling layer is organized around four questions:
+
+1. Which lexical URL features are most associated with maliciousness?
+2. How well can lexical features distinguish benign from malicious URLs?
+3. Which malicious subtype is hardest to classify?
+4. Do suspicious-token features add useful signal beyond the core lexical counts?
 
 ## Dataset
 
 - Source: [Kaggle - Malicious URLs Dataset](https://www.kaggle.com/datasets/sid321axn/malicious-urls-dataset)
 - Local file: `data/malicious_phish.csv`
-- Raw shape: 651,191 rows x 2 columns
-- Columns:
+- Raw schema:
   - `url`: raw URL text
   - `type`: label (`benign`, `phishing`, `malware`, `defacement`)
 
-The notebook also documents the upstream collections referenced by the dataset creator, including ISCX-URL-2016, Malware Domain Blacklist, Faizan repository, PhishTank, and PhishStorm.
+For the current checked-in dataset snapshot, the reproducible cleaning pipeline keeps `640,825` rows and removes malformed, duplicated, or conflicting URL records. Current cleaned class counts are:
 
-## Notebook Workflow
+- `benign`: 427,932
+- `defacement`: 95,308
+- `phishing`: 93,940
+- `malware`: 23,645
 
-### 1. Reproducibility and Data Acquisition
+The exact file hash used in the saved results is recorded in [`results/run_metadata.json`](results/run_metadata.json).
 
-- Uses relative-path loading so the notebook runs from either the repository root or `notebooks/`
-- Validates the expected schema and keeps fallback handling explicit
-- Prints local file provenance:
-  - resolved path
-  - file size
-  - SHA-256 hash
-  - row count
-  - loaded columns
+## Workflow
 
-### 2. Data Understanding
+### 1. Reproducible Data Loading and Cleaning
 
-- Defines the dataset schema and label meanings
-- Reports shape, data types, sample rows, and class balance
-- Summarizes URL length by class
-- Measures explicit `http`/`https` scheme usage by class
-
-Current raw class balance from the notebook:
-
-- `benign`: 428,103
-- `defacement`: 96,457
-- `phishing`: 94,111
-- `malware`: 32,520
-
-### 3. Data Cleaning
-
-The notebook applies a deterministic cleaning pipeline:
+The project uses explicit, deterministic preprocessing:
 
 1. Normalize string formatting and labels
 2. Drop missing URL or label values
 3. Drop empty URL or label values after stripping
-4. Keep only expected labels
+4. Keep only the four expected labels
 5. Remove URLs containing whitespace
 6. Remove URLs containing control characters
 7. Remove exact duplicate rows
 8. Remove duplicate URLs with conflicting labels
 
-Cleaning audit reported in the notebook:
+Cleaning audit tables are saved in [`results/cleaning_audit.csv`](results/cleaning_audit.csv).
 
-- Rows before cleaning: 651,191
-- Rows after cleaning: 640,792
-- Rows removed total: 10,399
+### 2. Feature Engineering
 
-Post-cleaning class counts:
+The original notebook engineers lexical features for EDA. The modelling code reuses and extends that work with interpretable features such as:
 
-- `benign`: 427,931
-- `defacement`: 95,285
-- `phishing`: 93,931
-- `malware`: 23,645
+- URL length and character counts
+- host length, path length, query length
+- path depth and subdomain count
+- indicators for query strings, schemes, IP-based hosts, `@`, and percent encoding
+- suspicious token indicators: `login`, `verify`, `account`, `secure`, `update`, `bank`
 
-### 4. Exploratory Data Analysis
+These are implemented in [`src/features.py`](src/features.py).
 
-EDA in the notebook includes:
+### 3. Supervised Modelling Tasks
 
-- Class distribution plots for the cleaned dataset
-- URL length distribution and class-wise comparison
-- Lexical feature engineering:
-  - `url_length`
-  - `digit_count`
-  - `dot_count`
-  - `hyphen_count`
-  - `slash_count`
-  - `has_query`
-  - `has_scheme`
-  - `has_ip_host`
-  - `tld`
-- Mean feature heatmaps by class
-- Correlation analysis for core lexical features
-- Suspicious token prevalence by class (`login`, `verify`, `account`, `secure`, `update`, `bank`)
-- Top-TLD composition by class
+Two classification tasks are included:
 
-### 5. Statistical Reasoning and Interpretation
+1. Binary classification: `benign` vs `malicious`
+2. Multiclass classification: `benign`, `phishing`, `malware`, `defacement`
 
-The notebook now makes the statistical reasoning explicit rather than leaving it implied in the charts.
+The modelling notebook keeps the workflow course-aligned:
 
-It includes:
+- stratified train/test split
+- cross-validation on the training split only
+- model tuning before final test evaluation
+- confusion matrices and per-class test metrics
+- interpretation after each major result section
 
-- Descriptive summaries by class for URL length:
-  - count
-  - mean
-  - median
-  - standard deviation
-  - quartiles
-  - IQR
-  - 95th percentile
-  - coefficient of variation
-  - mean-minus-median gap
-  - 95% confidence intervals for the mean
-- Spearman correlation ranking for lexical features
-- Wilson confidence intervals for:
-  - query-string prevalence
-  - IP-host prevalence
-- Interpretation text after each major section to explain what the patterns mean and what their limits are
+### 4. Models Compared
 
-Examples of current notebook findings:
+Three model families are compared for each task:
 
-- `defacement` URLs have the highest typical length
-- `phishing` URLs show the highest relative variability in length
-- `url_length` and `slash_count` have the strongest monotonic relationship among the core lexical features
-- `defacement` URLs show the highest query-string rate
-- `malware` URLs stand out for IP-based hosts
+- Majority-class baseline (`DummyClassifier`)
+- Logistic Regression
+- k-Nearest Neighbours
+
+Logistic regression is the main interpretive model. k-NN is included because it aligns with the lecture material and provides a nonlinear comparison point.
+
+### 5. Evaluation Strategy
+
+Evaluation emphasizes class imbalance and out-of-sample performance:
+
+- fixed random seed: `42`
+- stratified test split
+- `3`-fold cross-validation for tuning
+- accuracy
+- balanced accuracy
+- precision / recall / F1
+- macro F1
+- per-class metrics
+- confusion matrices
+
+Saved result tables include:
+
+- [`results/binary_feature_set_comparison.csv`](results/binary_feature_set_comparison.csv)
+- [`results/binary_cv_results.csv`](results/binary_cv_results.csv)
+- [`results/binary_test_metrics.csv`](results/binary_test_metrics.csv)
+- [`results/multiclass_cv_results.csv`](results/multiclass_cv_results.csv)
+- [`results/multiclass_test_metrics.csv`](results/multiclass_test_metrics.csv)
+
+### 6. Reproducibility Choice for k-NN
+
+The cleaned dataset is large enough that repeated cross-validation for k-NN on the full dataset would be unnecessarily expensive for a course project. To keep the workflow runnable on ordinary hardware, the modelling pipeline draws a reproducible stratified sample of `80,000` cleaned URLs for the supervised section. That choice is explicit in the notebook, code, and saved metadata.
+
+## Current Interpretation Summary
+
+The current saved results suggest:
+
+- k-NN is the strongest predictive model on both tasks
+- logistic regression is less accurate, but much easier to interpret
+- phishing is the hardest class to separate in the multiclass setting
+- suspicious-token features add only a small validation gain beyond the core lexical feature set
+
+These are associations in this dataset, not causal claims.
 
 ## Repository Structure
 
@@ -135,8 +136,16 @@ malicious-url-detection
 ├── data
 │   └── malicious_phish.csv
 ├── notebooks
-│   └── file1.ipynb
+│   ├── file1.ipynb
+│   └── 02_statistical_modeling.ipynb
+├── results
+│   ├── *.csv
+│   └── run_metadata.json
 ├── src
+│   ├── __init__.py
+│   ├── evaluate.py
+│   ├── features.py
+│   └── train.py
 ├── requirements.txt
 ├── README.md
 └── MaliciousURL_Analysis_Improved.pptx
@@ -151,28 +160,27 @@ malicious-url-detection
    pip install -r requirements.txt
    ```
 
-3. Start JupyterLab:
+3. Generate the modelling outputs:
+
+   ```bash
+   python -m src.train
+   ```
+
+4. Start JupyterLab:
 
    ```bash
    jupyter lab
    ```
 
-4. Open `notebooks/file1.ipynb` and run the cells in order.
+5. Run the notebooks in order if you want the full report flow:
 
-## Dependencies
+   - `notebooks/file1.ipynb`
+   - `notebooks/02_statistical_modeling.ipynb`
 
-The project dependencies are listed in [`requirements.txt`](requirements.txt) and currently include:
+## Limitations
 
-- `numpy`
-- `pandas`
-- `matplotlib`
-- `seaborn`
-- `ipython`
-- `ipykernel`
-- `jupyterlab`
-- `nbconvert`
-- `nbformat`
-
-## Current Scope
-
-This repository currently focuses on analytical reporting: acquisition, understanding, cleaning, EDA, reproducibility, and statistical interpretation of malicious URL patterns. It does not yet include model training, validation, or deployment.
+- The models are lexical-only and do not use page content, DNS, WHOIS, or temporal context.
+- k-NN predicts well here, but it is less interpretable and more computationally expensive than logistic regression.
+- Logistic regression coefficients describe association, not proof of cause.
+- The dataset is imbalanced, so headline accuracy alone is not reliable.
+- Results depend on the quality and representativeness of the labels in the source dataset.

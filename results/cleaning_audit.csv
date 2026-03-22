@@ -1,0 +1,9 @@
+step,rows_before,rows_after,rows_removed,pct_removed
+normalize formatting and labels,651191,651191,0,0.0
+drop missing url/type,651191,651191,0,0.0
+drop empty url/type after strip,651191,651191,0,0.0
+keep expected labels only,651191,651191,0,0.0
+remove URLs containing whitespace,651191,650885,306,0.047
+remove URLs containing control chars,650885,650870,15,0.0023
+remove exact duplicate rows,650870,640804,10066,1.5465
+remove duplicate URLs with conflicting labels,640804,640792,12,0.0019

@@ -1,0 +1,5 @@
+type,count,percentage
+benign,53425,66.78
+defacement,11896,14.87
+phishing,11727,14.66
+malware,2952,3.69

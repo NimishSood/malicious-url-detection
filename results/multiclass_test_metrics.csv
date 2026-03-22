@@ -1,0 +1,4 @@
+task,model,accuracy,balanced_accuracy,macro_f1,precision,recall,f1
+multiclass_url_type,k-NN,0.927,0.8795,0.8911,0.9048,0.8795,0.8911
+multiclass_url_type,Logistic Regression,0.7644,0.7958,0.7251,0.6888,0.7958,0.7251
+multiclass_url_type,Majority baseline,0.6678,0.25,0.2002,0.167,0.25,0.2002

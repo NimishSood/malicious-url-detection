@@ -1,0 +1,7 @@
+task,model,class,precision,recall,f1,support
+binary_benign_vs_malicious,Majority baseline,benign,0.6678,1.0,0.8008,10685
+binary_benign_vs_malicious,Majority baseline,malicious,0.0,0.0,0.0,5315
+binary_benign_vs_malicious,Logistic Regression,benign,0.894,0.8995,0.8967,10685
+binary_benign_vs_malicious,Logistic Regression,malicious,0.7954,0.7855,0.7904,5315
+binary_benign_vs_malicious,k-NN,benign,0.9543,0.9629,0.9586,10685
+binary_benign_vs_malicious,k-NN,malicious,0.9241,0.9072,0.9156,5315

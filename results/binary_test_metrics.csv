@@ -1,0 +1,4 @@
+task,model,accuracy,balanced_accuracy,macro_f1,precision,recall,f1
+binary_benign_vs_malicious,k-NN,0.9444,0.9351,0.9371,0.9241,0.9072,0.9156
+binary_benign_vs_malicious,Logistic Regression,0.8616,0.8425,0.8436,0.7954,0.7855,0.7904
+binary_benign_vs_malicious,Majority baseline,0.6678,0.5,0.4004,0.0,0.0,0.0

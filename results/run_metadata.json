@@ -1,0 +1,41 @@
+{
+  "random_state": 42,
+  "cv_folds": 3,
+  "test_size": 0.2,
+  "sample_size_requested": 80000,
+  "sample_size_used": 80000,
+  "cleaned_rows": 640792,
+  "binary_selected_feature_set": "extended",
+  "binary_best_params": {
+    "logistic": {
+      "model__C": 10.0,
+      "model__class_weight": "balanced"
+    },
+    "knn": {
+      "model__n_neighbors": 5,
+      "model__p": 1,
+      "model__weights": "uniform"
+    }
+  },
+  "multiclass_best_params": {
+    "logistic": {
+      "model__C": 10.0,
+      "model__class_weight": "balanced"
+    },
+    "knn": {
+      "model__n_neighbors": 5,
+      "model__p": 1,
+      "model__weights": "distance"
+    }
+  },
+  "provenance": {
+    "data_path": "C:\\Users\\Nimish\\Desktop\\malicious-url-detection\\data\\malicious_phish.csv",
+    "file_size_mb": 43.549,
+    "sha256": "d83ce942075dd63ed4d11560cfdcd9d512caa3d680e292f22cab484e8f074d01",
+    "rows_loaded": 651191,
+    "columns_loaded": [
+      "url",
+      "type"
+    ]
+  }
+}
